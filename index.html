@@ -26,6 +26,7 @@
     <a href="index.html"        class="nav-link active">Weather</a>
     <a href="forecast.html"     class="nav-link">Forecast</a>
     <a href="air-quality.html"  class="nav-link">Air Quality</a>
+    <a href="radar.html"        class="nav-link">Radar</a>
   </div>
 
   <div class="nav-right">
@@ -78,6 +79,12 @@
     </div>
   </div>
 
+  <!-- Fun fact bar (hidden until data loads) -->
+  <div id="fun-fact-bar" class="fun-fact-bar glass" style="display:none" aria-live="polite">
+    <span class="fun-fact-icon" aria-hidden="true">💡</span>
+    <p id="fun-fact-text" class="fun-fact-text"></p>
+  </div>
+
   <!-- Hourly strip -->
   <div class="glass hourly-wrap">
     <div class="section-label">Hourly Forecast</div>
@@ -87,7 +94,7 @@
   <!-- Module grid -->
   <div class="modules-grid" id="modules-grid">
 
-    <!-- UV Index -->
+    <!-- UV Index — clickable → detail modal -->
     <div class="glass module-card" id="uv-card">
       <div class="card-label">
         <span class="card-label-icon">☀️</span>
@@ -104,13 +111,10 @@
               <stop offset="100%" stop-color="#9C27B0"/>
             </linearGradient>
           </defs>
-          <!-- Track -->
           <path d="M 10 60 A 50 50 0 0 1 110 60"
                 fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="8" stroke-linecap="round"/>
-          <!-- Color band -->
           <path d="M 10 60 A 50 50 0 0 1 110 60"
                 fill="none" stroke="url(#uvGrad)" stroke-width="8" stroke-linecap="round" opacity="0.5"/>
-          <!-- Indicator -->
           <circle id="uv-dot" cx="10" cy="60" r="5.5" fill="white"
                   filter="drop-shadow(0 0 4px rgba(255,255,255,0.6))"/>
         </svg>
@@ -121,7 +125,7 @@
       </div>
     </div>
 
-    <!-- Wind -->
+    <!-- Wind — clickable -->
     <div class="glass module-card" id="wind-card">
       <div class="card-label">
         <span class="card-label-icon">💨</span>
@@ -129,12 +133,10 @@
       </div>
       <div class="wind-compass-wrap">
         <svg class="compass-svg" viewBox="0 0 100 100" aria-hidden="true">
-          <!-- Rings -->
           <circle cx="50" cy="50" r="44" fill="rgba(0,0,0,0.18)"
                   stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
           <circle cx="50" cy="50" r="34" fill="none"
                   stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
-          <!-- Cardinal labels -->
           <text x="50" y="13" text-anchor="middle" fill="rgba(255,255,255,0.9)"
                 font-size="9.5" font-weight="700" font-family="inherit">N</text>
           <text x="87" y="54" text-anchor="middle" fill="rgba(255,255,255,0.5)"
@@ -143,7 +145,6 @@
                 font-size="8.5" font-family="inherit">S</text>
           <text x="13" y="54" text-anchor="middle" fill="rgba(255,255,255,0.5)"
                 font-size="8.5" font-family="inherit">W</text>
-          <!-- Needle group — rotated by JS -->
           <g id="compass-needle">
             <polygon points="50,16 46,52 50,44 54,52" fill="#EF5350"/>
             <polygon points="50,84 46,48 50,56 54,48" fill="rgba(255,255,255,0.55)"/>
@@ -159,7 +160,7 @@
       <div class="card-sub" id="wind-dir">— · Gusts —</div>
     </div>
 
-    <!-- Humidity -->
+    <!-- Humidity — clickable -->
     <div class="glass module-card" id="humidity-card">
       <div class="card-label">
         <span class="card-label-icon">💧</span>
@@ -205,7 +206,7 @@
       <div class="card-sub" id="pressure-desc">—</div>
     </div>
 
-    <!-- Sunrise / Sunset — wide card -->
+    <!-- Sunrise/Sunset -->
     <div class="glass module-card wide" id="sunrise-card" style="min-height:120px">
       <div class="card-label">
         <span class="card-label-icon">🌅</span>
@@ -214,21 +215,14 @@
       <div class="sunrise-content">
         <div class="sunrise-arc-wrap">
           <svg class="sunrise-svg" viewBox="0 0 160 90" aria-hidden="true">
-            <!-- Track arc -->
             <path d="M 15 75 A 65 65 0 0 1 145 75"
                   fill="none" stroke="rgba(255,255,255,0.14)" stroke-width="3" stroke-linecap="round"/>
-            <!-- Horizon line -->
             <line x1="5" y1="75" x2="155" y2="75"
                   stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
-            <!-- Progress arc -->
             <path id="sun-arc" d="" fill="none" stroke="#FFD54F"
                   stroke-width="3" stroke-linecap="round"/>
-            <!-- Sun glow -->
-            <circle id="sun-glow" cx="80" cy="10" r="11"
-                    fill="rgba(255,215,0,0.18)"/>
-            <!-- Sun dot -->
-            <circle id="sun-dot" cx="80" cy="10" r="6"
-                    fill="#FFD54F"
+            <circle id="sun-glow" cx="80" cy="10" r="11" fill="rgba(255,215,0,0.18)"/>
+            <circle id="sun-dot"  cx="80" cy="10" r="6"  fill="#FFD54F"
                     filter="drop-shadow(0 0 5px rgba(255,213,79,0.8))"/>
           </svg>
         </div>
@@ -245,7 +239,7 @@
       </div>
     </div>
 
-    <!-- Precipitation -->
+    <!-- Precipitation — clickable -->
     <div class="glass module-card" id="precip-card">
       <div class="card-label">
         <span class="card-label-icon">🌧</span>
@@ -263,7 +257,8 @@
       </div>
       <div class="card-value" id="cloud-val">—<span class="card-value-unit">%</span></div>
       <div class="humidity-bar-track" style="margin-top:8px">
-        <div class="humidity-bar-fill" id="cloud-bar" style="width:0%;background:linear-gradient(90deg,#90A4AE,#CFD8DC)"></div>
+        <div class="humidity-bar-fill" id="cloud-bar"
+             style="width:0%;background:linear-gradient(90deg,#90A4AE,#CFD8DC)"></div>
       </div>
       <div class="card-sub" id="cloud-desc">—</div>
     </div>
@@ -284,6 +279,49 @@
 
 </main>
 
+<!-- ── Detail Modal ───────────────────────────────────── -->
+<div id="detail-modal" class="detail-modal" role="dialog" aria-modal="true" aria-labelledby="detail-title">
+  <div class="detail-backdrop" id="detail-backdrop"></div>
+  <div class="detail-sheet">
+    <div class="detail-drag-handle" aria-hidden="true"></div>
+
+    <div class="detail-header">
+      <div class="detail-icon-title">
+        <span class="detail-icon" id="detail-icon" aria-hidden="true"></span>
+        <h2 class="detail-title" id="detail-title">Detail</h2>
+      </div>
+      <button class="detail-close" id="detail-close" aria-label="Close detail view">✕</button>
+    </div>
+
+    <!-- Day strip -->
+    <div class="detail-day-strip" id="detail-day-strip" role="tablist"
+         aria-label="Select forecast day"></div>
+
+    <!-- Main value -->
+    <div class="detail-main">
+      <div class="detail-value-line">
+        <span class="detail-big-val"   id="detail-big-val">—</span>
+        <span class="detail-val-label" id="detail-val-label"></span>
+      </div>
+      <div class="detail-val-sub" id="detail-val-sub"></div>
+    </div>
+
+    <!-- Hourly mini-values (UV + precip) -->
+    <div class="detail-hourly-vals" id="detail-hourly-vals" aria-hidden="true"></div>
+
+    <!-- Chart canvas -->
+    <div class="detail-chart-wrap">
+      <canvas id="detail-chart" aria-hidden="true"></canvas>
+    </div>
+
+    <!-- Summary -->
+    <div class="detail-summary">
+      <div class="detail-summary-title">Daily Summary</div>
+      <p class="detail-summary-text" id="detail-summary-text">—</p>
+    </div>
+  </div>
+</div>
+
 <!-- ── Loading overlay ───────────────────────────────── -->
 <div id="loading-overlay">
   <div class="spinner"></div>
@@ -296,6 +334,8 @@
 <script src="js/codes.js"></script>
 <script src="js/utils.js"></script>
 <script src="js/api.js"></script>
+<script src="js/facts.js"></script>
+<script src="js/details.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Radar — Aura Weather</title>
+  <meta name="description" content="Live animated precipitation radar and cloud timelapse for any location." />
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/main.css" />
+
+  <style>
+    /* ── Radar page overrides ───────────────────────── */
+    body { overflow: hidden; }
+
+    .radar-page {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Map takes all remaining space */
+    #radar-map {
+      flex: 1;
+      position: relative;
+      z-index: 0;
+    }
+
+    /* Remove default Leaflet focus outline */
+    .leaflet-container { outline: none; background: #0d1117; }
+    .leaflet-tile-pane { filter: brightness(0.88) saturate(0.7); }
+
+    /* ── Location marker ────────────────────────────── */
+    .loc-marker-wrap {
+      width: 44px;
+      height: 44px;
+      position: relative;
+      cursor: default;
+    }
+
+    .loc-pulse {
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      background: rgba(66, 165, 245, 0.25);
+      animation: pulse-ring 2s ease-out infinite;
+    }
+
+    .loc-dot {
+      position: absolute;
+      inset: 8px;
+      border-radius: 50%;
+      background: #42A5F5;
+      border: 3px solid white;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    }
+
+    @keyframes pulse-ring {
+      0%   { transform: scale(0.6); opacity: 0.8; }
+      100% { transform: scale(1.8); opacity: 0;   }
+    }
+
+    /* ── Weather bubble marker ──────────────────────── */
+    .weather-bubble {
+      background: rgba(30, 90, 180, 0.88);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 24px;
+      padding: 8px 14px;
+      color: white;
+      font-family: 'DM Sans', -apple-system, sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      cursor: default;
+    }
+
+    /* ── Playback controls ──────────────────────────── */
+    .radar-controls {
+      position: absolute;
+      bottom: 0;
+      left: 0; right: 0;
+      z-index: 500;
+      background: rgba(10,12,22,0.88);
+      backdrop-filter: blur(24px);
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding: 12px 20px 22px;
+      font-family: 'DM Sans', -apple-system, sans-serif;
+    }
+
+    .radar-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .radar-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.55);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    #radar-time-display {
+      font-size: 15px;
+      font-weight: 500;
+      color: white;
+    }
+
+    .radar-speed-row {
+      display: flex;
+      gap: 6px;
+    }
+
+    .speed-btn {
+      padding: 4px 12px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.55);
+      font-size: 12px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .speed-btn.active {
+      background: rgba(255,255,255,0.2);
+      color: white;
+    }
+
+    .radar-scrubber-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    #play-btn {
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: white;
+      font-size: 18px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s;
+      flex-shrink: 0;
+      font-family: inherit;
+    }
+
+    #play-btn:hover { background: rgba(255,255,255,0.25); }
+
+    #radar-scrubber {
+      flex: 1;
+      -webkit-appearance: none;
+      height: 3px;
+      border-radius: 2px;
+      background: rgba(255,255,255,0.15);
+      outline: none;
+      cursor: pointer;
+    }
+
+    #radar-scrubber::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: white;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+      cursor: pointer;
+    }
+
+    #radar-scrubber::-moz-range-thumb {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    .scrubber-now-label {
+      font-size: 12px;
+      color: rgba(255,255,255,0.4);
+      white-space: nowrap;
+    }
+
+    /* ── Legend ─────────────────────────────────────── */
+    .radar-legend {
+      position: absolute;
+      top: 72px;
+      left: 16px;
+      z-index: 400;
+      background: rgba(10,12,22,0.82);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 14px;
+      padding: 10px 14px;
+      font-family: 'DM Sans', -apple-system, sans-serif;
+      color: white;
+      min-width: 130px;
+    }
+
+    .legend-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: rgba(255,255,255,0.55);
+      margin-bottom: 8px;
+    }
+
+    .legend-bar {
+      height: 8px;
+      border-radius: 4px;
+      background: linear-gradient(to right,
+        #0000FF, #00BFFF, #00FF00, #FFFF00, #FF8C00, #FF0000, #FF00FF
+      );
+      margin-bottom: 5px;
+    }
+
+    .legend-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: rgba(255,255,255,0.45);
+    }
+
+    /* ── Loading state ──────────────────────────────── */
+    #radar-loading {
+      position: absolute;
+      inset: 0;
+      z-index: 600;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(10,12,22,0.8);
+      backdrop-filter: blur(8px);
+      gap: 16px;
+      font-family: 'DM Sans', -apple-system, sans-serif;
+      color: rgba(255,255,255,0.7);
+      font-size: 15px;
+      transition: opacity 0.5s ease;
+    }
+
+    #radar-loading.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* ── Leaflet attribution overrides ─────────────── */
+    .leaflet-control-attribution {
+      background: rgba(0,0,0,0.5) !important;
+      color: rgba(255,255,255,0.4) !important;
+      font-size: 9px !important;
+    }
+
+    .leaflet-control-attribution a { color: rgba(255,255,255,0.5) !important; }
+
+    .leaflet-control-zoom a {
+      background: rgba(20,24,40,0.9) !important;
+      color: white !important;
+      border-color: rgba(255,255,255,0.15) !important;
+    }
+  </style>
+</head>
+<body>
+
+<div class="radar-page">
+
+  <!-- Navigation -->
+  <nav class="site-nav" style="position:relative;z-index:600;flex-shrink:0;">
+    <a href="index.html" class="nav-brand">
+      <span class="nav-brand-icon">🌤</span>
+      Aura
+    </a>
+    <div class="nav-links">
+      <a href="index.html"       class="nav-link">Weather</a>
+      <a href="forecast.html"    class="nav-link">Forecast</a>
+      <a href="air-quality.html" class="nav-link">Air Quality</a>
+      <a href="radar.html"       class="nav-link active">Radar</a>
+    </div>
+    <div class="nav-right" style="font-size:13px;color:rgba(255,255,255,0.5)">
+      <span id="nav-city-name">—</span>
+    </div>
+  </nav>
+
+  <!-- Map -->
+  <div id="radar-map"></div>
+
+  <!-- Legend -->
+  <div class="radar-legend">
+    <div class="legend-title">Precipitation</div>
+    <div class="legend-bar"></div>
+    <div class="legend-labels">
+      <span>Light</span>
+      <span>Moderate</span>
+      <span>Heavy</span>
+      <span>Extreme</span>
+    </div>
+  </div>
+
+  <!-- Playback controls -->
+  <div class="radar-controls">
+    <div class="radar-top-row">
+      <div>
+        <div class="radar-label">Forecast</div>
+        <div id="radar-time-display">Loading radar…</div>
+      </div>
+      <div class="radar-speed-row">
+        <button class="speed-btn active" data-speed="4000">1×</button>
+        <button class="speed-btn"        data-speed="2000">2×</button>
+        <button class="speed-btn"        data-speed="800">4×</button>
+      </div>
+    </div>
+
+    <div class="radar-scrubber-row">
+      <button id="play-btn" aria-label="Play/Pause">▶</button>
+      <input type="range" id="radar-scrubber" min="0" max="11" value="11" step="1" />
+      <span class="scrubber-now-label">Now</span>
+    </div>
+  </div>
+
+  <!-- Loading overlay -->
+  <div id="radar-loading">
+    <div class="spinner"></div>
+    <span>Loading radar data…</span>
+  </div>
+
+</div><!-- /radar-page -->
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV/XN2GqM=" crossorigin=""></script>
+
+<script src="js/codes.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/api.js"></script>
+<script src="js/radar.js"></script>
+</body>
+</html>

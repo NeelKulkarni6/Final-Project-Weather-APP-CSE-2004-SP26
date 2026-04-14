@@ -21,9 +21,13 @@ const API = {
       'surface_pressure', 'visibility', 'is_day', 'uv_index',
     ].join(',');
 
+    // Extended hourly — relative_humidity_2m, uv_index, wind_gusts, wind_direction
+    // and precipitation needed for the iOS-style detail chart modals
     const HOURLY_VARS = [
       'temperature_2m', 'weather_code', 'precipitation_probability',
-      'wind_speed_10m', 'is_day', 'visibility',
+      'precipitation', 'wind_speed_10m', 'wind_gusts_10m',
+      'wind_direction_10m', 'is_day', 'visibility',
+      'relative_humidity_2m', 'uv_index',
     ].join(',');
 
     const DAILY_VARS = [
