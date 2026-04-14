@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aura Weather — Real-Time Forecasts</title>
+  <meta name="description" content="Beautiful real-time weather for any location. Current conditions, hourly forecasts, air quality, and more." />
+
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/main.css" />
+</head>
+<body>
+
+<!-- ── Animated background ───────────────────────────── -->
+<div id="weather-bg"></div>
+<div id="particles"></div>
+
+<!-- ── Navigation ────────────────────────────────────── -->
+<nav class="site-nav">
+  <a href="index.html" class="nav-brand">
+    <span class="nav-brand-icon">🌤</span>
+    Aura
+  </a>
+
+  <div class="nav-links">
+    <a href="index.html"        class="nav-link active">Weather</a>
+    <a href="forecast.html"     class="nav-link">Forecast</a>
+    <a href="air-quality.html"  class="nav-link">Air Quality</a>
+  </div>
+
+  <div class="nav-right">
+    <button class="geo-btn" id="geo-btn" title="Use my location">⊙</button>
+    <div class="unit-toggle" id="unit-toggle" role="group" aria-label="Temperature unit">
+      <span class="unit-opt active" data-unit="F">°F</span>
+      <span class="unit-opt"        data-unit="C">°C</span>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Main content ──────────────────────────────────── -->
+<main class="page-wrapper page-enter">
+
+  <!-- Search -->
+  <div class="search-wrap">
+    <input
+      type="text"
+      id="search-input"
+      class="search-input"
+      placeholder="Search any city…"
+      autocomplete="off"
+      spellcheck="false"
+      aria-label="Search for a city"
+    />
+    <span class="search-icon" aria-hidden="true">⌕</span>
+    <div id="search-dropdown" class="search-dropdown glass" role="listbox"></div>
+  </div>
+
+  <!-- Hero card -->
+  <div class="weather-hero" id="weather-hero">
+    <img src="" alt="City photo" class="hero-img" id="hero-img" />
+    <div class="hero-gradient"></div>
+
+    <div class="hero-actions">
+      <button class="hero-btn" id="save-btn" title="Save location">♡</button>
+    </div>
+
+    <div class="hero-body">
+      <div class="hero-location" id="hero-location">
+        <span id="hero-city">—</span>
+        <span class="hero-local-time" id="hero-time">—</span>
+      </div>
+      <div class="hero-temp" id="hero-temp">—</div>
+      <div class="hero-condition" id="hero-condition">—</div>
+      <div class="hero-hilo" id="hero-hilo">
+        <span>H: <span id="hero-high">—</span></span>
+        <span>L: <span id="hero-low">—</span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hourly strip -->
+  <div class="glass hourly-wrap">
+    <div class="section-label">Hourly Forecast</div>
+    <div class="hourly-scroll" id="hourly-scroll" role="list"></div>
+  </div>
+
+  <!-- Module grid -->
+  <div class="modules-grid" id="modules-grid">
+
+    <!-- UV Index -->
+    <div class="glass module-card" id="uv-card">
+      <div class="card-label">
+        <span class="card-label-icon">☀️</span>
+        UV Index
+      </div>
+      <div class="uv-gauge-wrap">
+        <svg class="gauge-svg" viewBox="0 0 120 70" aria-hidden="true">
+          <defs>
+            <linearGradient id="uvGrad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%"   stop-color="#4CAF50"/>
+              <stop offset="28%"  stop-color="#CDDC39"/>
+              <stop offset="50%"  stop-color="#FF9800"/>
+              <stop offset="72%"  stop-color="#F44336"/>
+              <stop offset="100%" stop-color="#9C27B0"/>
+            </linearGradient>
+          </defs>
+          <!-- Track -->
+          <path d="M 10 60 A 50 50 0 0 1 110 60"
+                fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="8" stroke-linecap="round"/>
+          <!-- Color band -->
+          <path d="M 10 60 A 50 50 0 0 1 110 60"
+                fill="none" stroke="url(#uvGrad)" stroke-width="8" stroke-linecap="round" opacity="0.5"/>
+          <!-- Indicator -->
+          <circle id="uv-dot" cx="10" cy="60" r="5.5" fill="white"
+                  filter="drop-shadow(0 0 4px rgba(255,255,255,0.6))"/>
+        </svg>
+        <div class="uv-center-text">
+          <div class="uv-num" id="uv-num">—</div>
+          <div class="uv-cat" id="uv-cat">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Wind -->
+    <div class="glass module-card" id="wind-card">
+      <div class="card-label">
+        <span class="card-label-icon">💨</span>
+        Wind
+      </div>
+      <div class="wind-compass-wrap">
+        <svg class="compass-svg" viewBox="0 0 100 100" aria-hidden="true">
+          <!-- Rings -->
+          <circle cx="50" cy="50" r="44" fill="rgba(0,0,0,0.18)"
+                  stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+          <circle cx="50" cy="50" r="34" fill="none"
+                  stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+          <!-- Cardinal labels -->
+          <text x="50" y="13" text-anchor="middle" fill="rgba(255,255,255,0.9)"
+                font-size="9.5" font-weight="700" font-family="inherit">N</text>
+          <text x="87" y="54" text-anchor="middle" fill="rgba(255,255,255,0.5)"
+                font-size="8.5" font-family="inherit">E</text>
+          <text x="50" y="93" text-anchor="middle" fill="rgba(255,255,255,0.5)"
+                font-size="8.5" font-family="inherit">S</text>
+          <text x="13" y="54" text-anchor="middle" fill="rgba(255,255,255,0.5)"
+                font-size="8.5" font-family="inherit">W</text>
+          <!-- Needle group — rotated by JS -->
+          <g id="compass-needle">
+            <polygon points="50,16 46,52 50,44 54,52" fill="#EF5350"/>
+            <polygon points="50,84 46,48 50,56 54,48" fill="rgba(255,255,255,0.55)"/>
+            <circle cx="50" cy="50" r="4"   fill="rgba(255,255,255,0.9)"/>
+            <circle cx="50" cy="50" r="2.2" fill="#333"/>
+          </g>
+        </svg>
+      </div>
+      <div class="wind-speed-row">
+        <span class="card-value" id="wind-speed" style="font-size:30px">—</span>
+        <span class="card-value-unit" id="wind-unit" style="font-size:14px">mph</span>
+      </div>
+      <div class="card-sub" id="wind-dir">— · Gusts —</div>
+    </div>
+
+    <!-- Humidity -->
+    <div class="glass module-card" id="humidity-card">
+      <div class="card-label">
+        <span class="card-label-icon">💧</span>
+        Humidity
+      </div>
+      <div class="card-value" id="humidity-val">—<span class="card-value-unit">%</span></div>
+      <div class="humidity-bar-track">
+        <div class="humidity-bar-fill" id="humidity-bar" style="width:0%"></div>
+      </div>
+      <div class="card-sub" id="humidity-desc">—</div>
+    </div>
+
+    <!-- Feels Like -->
+    <div class="glass module-card" id="feelslike-card">
+      <div class="card-label">
+        <span class="card-label-icon">🌡</span>
+        Feels Like
+      </div>
+      <div class="card-value" id="feelslike-val">—</div>
+      <div class="card-sub" id="feelslike-desc">—</div>
+    </div>
+
+    <!-- Visibility -->
+    <div class="glass module-card" id="visibility-card">
+      <div class="card-label">
+        <span class="card-label-icon">👁</span>
+        Visibility
+      </div>
+      <div class="card-value" id="visibility-val">—<span class="card-value-unit" id="vis-unit"> mi</span></div>
+      <div class="card-sub" id="visibility-desc">—</div>
+    </div>
+
+    <!-- Pressure -->
+    <div class="glass module-card" id="pressure-card">
+      <div class="card-label">
+        <span class="card-label-icon">🔵</span>
+        Pressure
+      </div>
+      <div class="card-value" id="pressure-val">—<span class="card-value-unit">hPa</span></div>
+      <div class="pressure-track">
+        <div class="pressure-fill" id="pressure-bar" style="width:50%"></div>
+      </div>
+      <div class="card-sub" id="pressure-desc">—</div>
+    </div>
+
+    <!-- Sunrise / Sunset — wide card -->
+    <div class="glass module-card wide" id="sunrise-card" style="min-height:120px">
+      <div class="card-label">
+        <span class="card-label-icon">🌅</span>
+        Sunrise &amp; Sunset
+      </div>
+      <div class="sunrise-content">
+        <div class="sunrise-arc-wrap">
+          <svg class="sunrise-svg" viewBox="0 0 160 90" aria-hidden="true">
+            <!-- Track arc -->
+            <path d="M 15 75 A 65 65 0 0 1 145 75"
+                  fill="none" stroke="rgba(255,255,255,0.14)" stroke-width="3" stroke-linecap="round"/>
+            <!-- Horizon line -->
+            <line x1="5" y1="75" x2="155" y2="75"
+                  stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+            <!-- Progress arc -->
+            <path id="sun-arc" d="" fill="none" stroke="#FFD54F"
+                  stroke-width="3" stroke-linecap="round"/>
+            <!-- Sun glow -->
+            <circle id="sun-glow" cx="80" cy="10" r="11"
+                    fill="rgba(255,215,0,0.18)"/>
+            <!-- Sun dot -->
+            <circle id="sun-dot" cx="80" cy="10" r="6"
+                    fill="#FFD54F"
+                    filter="drop-shadow(0 0 5px rgba(255,213,79,0.8))"/>
+          </svg>
+        </div>
+        <div class="sunrise-times">
+          <div class="sun-time-row">
+            <div class="sun-time-label">Sunrise</div>
+            <div class="sun-time-val" id="sunrise-val">—</div>
+          </div>
+          <div class="sun-time-row">
+            <div class="sun-time-label">Sunset</div>
+            <div class="sun-time-val" id="sunset-val">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Precipitation -->
+    <div class="glass module-card" id="precip-card">
+      <div class="card-label">
+        <span class="card-label-icon">🌧</span>
+        Precipitation
+      </div>
+      <div class="card-value" id="precip-val">—<span class="card-value-unit" id="precip-unit">in</span></div>
+      <div class="card-sub" id="precip-desc">—</div>
+    </div>
+
+    <!-- Cloud cover -->
+    <div class="glass module-card" id="cloud-card">
+      <div class="card-label">
+        <span class="card-label-icon">☁️</span>
+        Cloud Cover
+      </div>
+      <div class="card-value" id="cloud-val">—<span class="card-value-unit">%</span></div>
+      <div class="humidity-bar-track" style="margin-top:8px">
+        <div class="humidity-bar-fill" id="cloud-bar" style="width:0%;background:linear-gradient(90deg,#90A4AE,#CFD8DC)"></div>
+      </div>
+      <div class="card-sub" id="cloud-desc">—</div>
+    </div>
+
+  </div><!-- /modules-grid -->
+
+  <!-- 10-day forecast -->
+  <div class="glass daily-wrap" id="daily-wrap">
+    <div class="section-label">10-Day Forecast</div>
+    <div id="daily-list" role="list"></div>
+  </div>
+
+  <!-- Saved locations -->
+  <section class="saved-section" id="saved-section" style="display:none">
+    <div class="saved-heading">Saved Locations</div>
+    <div class="saved-grid" id="saved-grid"></div>
+  </section>
+
+</main>
+
+<!-- ── Loading overlay ───────────────────────────────── -->
+<div id="loading-overlay">
+  <div class="spinner"></div>
+</div>
+
+<!-- ── Toast ─────────────────────────────────────────── -->
+<div id="toast" role="alert" aria-live="polite"></div>
+
+<!-- ── Scripts ───────────────────────────────────────── -->
+<script src="js/codes.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

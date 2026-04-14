@@ -1,0 +1,324 @@
+/* ═══════════════════════════════════════════════════════════
+   Aura Weather — Animated Backgrounds & Weather Effects
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Weather background gradients ─────────────────────── */
+
+.bg-clear-day {
+  background: linear-gradient(180deg,
+    #0B3FA6 0%, #1565C0 20%, #1E88E5 45%, #42A5F5 70%, #90CAF9 100%
+  );
+  animation: sky-breathe 25s ease-in-out infinite alternate;
+}
+
+.bg-clear-night {
+  background: linear-gradient(180deg,
+    #04081F 0%, #080F2B 30%, #0D1A3F 60%, #162248 100%
+  );
+}
+
+.bg-partly-day {
+  background: linear-gradient(180deg,
+    #1565C0 0%, #1976D2 30%, #2196F3 55%, #64B5F6 80%, #BBDEFB 100%
+  );
+  animation: sky-breathe 30s ease-in-out infinite alternate;
+}
+
+.bg-partly-night {
+  background: linear-gradient(180deg,
+    #0A0F2A 0%, #111935 35%, #1A2448 65%, #223060 100%
+  );
+}
+
+.bg-cloudy {
+  background: linear-gradient(180deg,
+    #37474F 0%, #455A64 30%, #546E7A 60%, #607D8B 100%
+  );
+}
+
+.bg-cloudy-night {
+  background: linear-gradient(180deg,
+    #1A1A24 0%, #222230 35%, #2A2A3A 65%, #30304A 100%
+  );
+}
+
+.bg-rain {
+  background: linear-gradient(180deg,
+    #1C2E40 0%, #243547 30%, #2C3D55 60%, #344562 100%
+  );
+}
+
+.bg-rain-night {
+  background: linear-gradient(180deg,
+    #0D1520 0%, #121A28 30%, #172030 65%, #1C2638 100%
+  );
+}
+
+.bg-sleet {
+  background: linear-gradient(180deg,
+    #263238 0%, #2E3C43 30%, #37474F 60%, #40515A 100%
+  );
+}
+
+.bg-snow {
+  background: linear-gradient(180deg,
+    #78909C 0%, #90A4AE 25%, #B0BEC5 55%, #CFD8DC 80%, #ECEFF1 100%
+  );
+}
+
+.bg-snow-night {
+  background: linear-gradient(180deg,
+    #263238 0%, #2E3A42 30%, #37454D 65%, #405058 100%
+  );
+}
+
+.bg-storm {
+  background: linear-gradient(180deg,
+    #0A0C12 0%, #0F1220 30%, #151A2E 60%, #1A2038 100%
+  );
+  animation: storm-pulse 4s ease-in-out infinite alternate;
+}
+
+.bg-fog {
+  background: linear-gradient(180deg,
+    #78909C 0%, #90A4AE 25%, #B0BEC5 55%, #CFD8DC 100%
+  );
+  animation: fog-drift 15s ease-in-out infinite alternate;
+}
+
+.bg-fog-night {
+  background: linear-gradient(180deg,
+    #3A3A4A 0%, #44444E 30%, #4E4E58 65%, #585864 100%
+  );
+}
+
+/* Sun glow overlay for clear-day */
+.bg-clear-day::before,
+.bg-partly-day::before {
+  content: '';
+  position: fixed;
+  top: -10%;
+  left: 20%;
+  width: 60%;
+  height: 50%;
+  background: radial-gradient(ellipse, rgba(255, 230, 100, 0.18) 0%, transparent 70%);
+  pointer-events: none;
+  animation: sun-pulse 10s ease-in-out infinite alternate;
+}
+
+/* Moon glow overlay for clear night */
+.bg-clear-night::before,
+.bg-partly-night::before {
+  content: '';
+  position: fixed;
+  top: 5%;
+  right: 15%;
+  width: 30%;
+  height: 30%;
+  background: radial-gradient(ellipse, rgba(200, 220, 255, 0.12) 0%, transparent 70%);
+  pointer-events: none;
+  animation: moon-glow 8s ease-in-out infinite alternate;
+}
+
+/* ── Background keyframes ──────────────────────────────── */
+
+@keyframes sky-breathe {
+  from { filter: brightness(1) saturate(1); }
+  to   { filter: brightness(1.06) saturate(1.08); }
+}
+
+@keyframes storm-pulse {
+  from { filter: brightness(1); }
+  to   { filter: brightness(1.12); }
+}
+
+@keyframes fog-drift {
+  from { filter: blur(0px) brightness(1); }
+  to   { filter: blur(0.5px) brightness(1.04); }
+}
+
+@keyframes sun-pulse {
+  from { opacity: 0.7; transform: scale(1); }
+  to   { opacity: 1;   transform: scale(1.08); }
+}
+
+@keyframes moon-glow {
+  from { opacity: 0.6; }
+  to   { opacity: 1; }
+}
+
+/* ── Particle base ─────────────────────────────────────── */
+#particles {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* ── Rain ──────────────────────────────────────────────── */
+.rain-drop {
+  position: absolute;
+  top: -30px;
+  width: 1.5px;
+  background: linear-gradient(to bottom, transparent, rgba(180, 210, 240, 0.65));
+  border-radius: 0 0 2px 2px;
+  transform: rotate(15deg);
+  animation: rain-fall linear infinite;
+}
+
+@keyframes rain-fall {
+  0%   { transform: rotate(15deg) translateY(0); }
+  100% { transform: rotate(15deg) translateY(110vh); }
+}
+
+/* ── Snow ──────────────────────────────────────────────── */
+.snow-flake {
+  position: absolute;
+  top: -20px;
+  color: rgba(255, 255, 255, 0.85);
+  user-select: none;
+  animation: snow-fall ease-in-out infinite;
+}
+
+@keyframes snow-fall {
+  0%   { transform: translateX(0)    rotate(0deg);   opacity: 0; }
+  5%   { opacity: 1; }
+  45%  { transform: translateX(25px) rotate(180deg); }
+  55%  { transform: translateX(15px) rotate(220deg); }
+  90%  { opacity: 1; }
+  100% { transform: translateX(-20px) rotate(360deg); opacity: 0;
+         top: 110vh; }
+}
+
+/* ── Stars ─────────────────────────────────────────────── */
+.star-dot {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  animation: star-twinkle ease-in-out infinite;
+}
+
+@keyframes star-twinkle {
+  0%, 100% { opacity: 0.9; transform: scale(1); }
+  50%       { opacity: 0.15; transform: scale(0.6); }
+}
+
+/* Shooting star */
+.shooting-star {
+  position: absolute;
+  width: 80px;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(255,255,255,0.8), transparent);
+  animation: shoot linear infinite;
+  transform-origin: left;
+}
+
+@keyframes shoot {
+  0%   { transform: rotate(-35deg) translateX(-200px); opacity: 0; }
+  5%   { opacity: 1; }
+  20%  { opacity: 0; transform: rotate(-35deg) translateX(200vw); }
+  100% { opacity: 0; transform: rotate(-35deg) translateX(200vw); }
+}
+
+/* ── Lightning ─────────────────────────────────────────── */
+.lightning-bolt {
+  position: fixed;
+  inset: 0;
+  background: rgba(220, 230, 255, 0.1);
+  pointer-events: none;
+  animation: lightning-flash linear infinite;
+  z-index: 2;
+}
+
+@keyframes lightning-flash {
+  0%, 100%   { opacity: 0; }
+  /* First flash */
+  4.8%       { opacity: 0; }
+  5%         { opacity: 0.8; }
+  5.2%       { opacity: 0; }
+  /* Second flash */
+  5.8%       { opacity: 0; }
+  6%         { opacity: 0.6; }
+  6.3%       { opacity: 0; }
+  /* Long dark gap */
+  6.4%, 100% { opacity: 0; }
+}
+
+/* Varied timing for second lightning element */
+.lightning-bolt:nth-child(2) {
+  animation-delay: 3.7s;
+  animation-duration: 6s;
+}
+
+/* ── Cloud drifts (partly cloudy) ──────────────────────── */
+.cloud-layer {
+  position: fixed;
+  pointer-events: none;
+  opacity: 0.45;
+  filter: blur(1px);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+  animation: cloud-drift linear infinite;
+}
+
+@keyframes cloud-drift {
+  from { transform: translateX(-250px); }
+  to   { transform: translateX(110vw); }
+}
+
+/* ── Page transitions ──────────────────────────────────── */
+.page-enter {
+  animation: page-fade-in 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes page-fade-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Loading skeleton shimmer ──────────────────────────── */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.04) 25%,
+    rgba(255,255,255,0.1)  50%,
+    rgba(255,255,255,0.04) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite;
+  border-radius: 6px;
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* ── Loading spinner ───────────────────────────────────── */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Card entrance ─────────────────────────────────────── */
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(16px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+
+/* ── Saved location tile entrance ──────────────────────── */
+@keyframes tile-in {
+  from { opacity: 0; transform: scale(0.9); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* ── AQI ring animation ────────────────────────────────── */
+@keyframes aqi-fill {
+  from { stroke-dashoffset: 502; }
+}
+
+/* ── Temperature bar fill ──────────────────────────────── */
+@keyframes bar-grow {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}

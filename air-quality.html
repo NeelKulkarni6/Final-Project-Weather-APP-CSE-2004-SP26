@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Air Quality — Aura Weather</title>
+  <meta name="description" content="Real-time air quality index, pollutant levels, and health guidance for your location." />
+
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/main.css" />
+</head>
+<body>
+
+<div id="weather-bg"></div>
+<div id="particles"></div>
+
+<nav class="site-nav">
+  <a href="index.html" class="nav-brand">
+    <span class="nav-brand-icon">🌤</span>
+    Aura
+  </a>
+
+  <div class="nav-links">
+    <a href="index.html"       class="nav-link">Weather</a>
+    <a href="forecast.html"    class="nav-link">Forecast</a>
+    <a href="air-quality.html" class="nav-link active">Air Quality</a>
+  </div>
+
+  <div class="nav-right">
+    <div class="unit-toggle" id="unit-toggle" role="group">
+      <span class="unit-opt active" data-unit="F">°F</span>
+      <span class="unit-opt"        data-unit="C">°C</span>
+    </div>
+  </div>
+</nav>
+
+<main class="page-wrapper page-enter">
+
+  <!-- Page heading -->
+  <div style="padding:16px 4px 0;display:flex;align-items:baseline;gap:10px;">
+    <h1 id="page-city"
+        style="font-size:28px;font-weight:300;color:white;letter-spacing:-0.5px">—</h1>
+    <span id="page-sub"
+          style="font-size:14px;color:rgba(255,255,255,0.5)">Air Quality Index</span>
+  </div>
+
+  <!-- AQI hero -->
+  <div class="glass aqi-hero-card">
+    <div class="aqi-ring-wrap">
+      <svg class="aqi-ring-svg" viewBox="0 0 160 160" aria-hidden="true">
+        <!-- Background track -->
+        <circle cx="80" cy="80" r="70" fill="none"
+                stroke="rgba(255,255,255,0.1)" stroke-width="12"/>
+        <!-- Colorized track (decorative) -->
+        <circle cx="80" cy="80" r="70" fill="none"
+                stroke="url(#aqiGrad)" stroke-width="12"
+                stroke-dasharray="440" stroke-dashoffset="0"
+                opacity="0.2" stroke-linecap="round"/>
+        <!-- Progress arc -->
+        <circle id="aqi-arc" cx="80" cy="80" r="70" fill="none"
+                stroke="#4CAF50" stroke-width="12"
+                stroke-dasharray="440" stroke-dashoffset="440"
+                stroke-linecap="round"
+                style="transition: stroke-dashoffset 1.5s cubic-bezier(0.4,0,0.2,1),
+                                   stroke 0.8s ease"/>
+        <defs>
+          <linearGradient id="aqiGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%"   stop-color="#4CAF50"/>
+            <stop offset="40%"  stop-color="#FFEB3B"/>
+            <stop offset="70%"  stop-color="#FF9800"/>
+            <stop offset="100%" stop-color="#9C27B0"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <div class="aqi-ring-center">
+        <div class="aqi-number" id="aqi-number">—</div>
+        <div class="aqi-label">US AQI</div>
+      </div>
+    </div>
+
+    <div class="aqi-info">
+      <div class="aqi-category" id="aqi-category">Loading…</div>
+      <div class="aqi-guidance" id="aqi-guidance">Fetching air quality data…</div>
+
+      <!-- AQI scale bar -->
+      <div class="aqi-scale" aria-hidden="true">
+        <div class="aqi-scale-seg" style="background:#4CAF50"></div>
+        <div class="aqi-scale-seg" style="background:#CDDC39"></div>
+        <div class="aqi-scale-seg" style="background:#FF9800"></div>
+        <div class="aqi-scale-seg" style="background:#F44336"></div>
+        <div class="aqi-scale-seg" style="background:#9C27B0"></div>
+        <div class="aqi-scale-seg" style="background:#7B1FA2"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:4px;
+                  font-size:10px;color:rgba(255,255,255,0.35)">
+        <span>0</span><span>50</span><span>100</span>
+        <span>150</span><span>200</span><span>300</span><span>500</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pollutant cards grid -->
+  <div class="pollutant-grid" id="pollutant-grid">
+    <!-- PM2.5 -->
+    <div class="glass pollutant-card" id="pm25-card">
+      <div class="pollutant-name">PM2.5</div>
+      <div class="pollutant-full-name">Fine particles</div>
+      <div class="pollutant-value" id="pm25-val">—</div>
+      <div class="pollutant-unit">μg/m³</div>
+      <div class="pollutant-bar-track">
+        <div class="pollutant-bar-fill" id="pm25-bar"
+             style="width:0%;background:linear-gradient(90deg,#64B5F6,#1976D2)"></div>
+      </div>
+    </div>
+    <!-- PM10 -->
+    <div class="glass pollutant-card" id="pm10-card">
+      <div class="pollutant-name">PM10</div>
+      <div class="pollutant-full-name">Coarse particles</div>
+      <div class="pollutant-value" id="pm10-val">—</div>
+      <div class="pollutant-unit">μg/m³</div>
+      <div class="pollutant-bar-track">
+        <div class="pollutant-bar-fill" id="pm10-bar"
+             style="width:0%;background:linear-gradient(90deg,#81C784,#388E3C)"></div>
+      </div>
+    </div>
+    <!-- Ozone -->
+    <div class="glass pollutant-card" id="ozone-card">
+      <div class="pollutant-name">O₃</div>
+      <div class="pollutant-full-name">Ozone</div>
+      <div class="pollutant-value" id="ozone-val">—</div>
+      <div class="pollutant-unit">μg/m³</div>
+      <div class="pollutant-bar-track">
+        <div class="pollutant-bar-fill" id="ozone-bar"
+             style="width:0%;background:linear-gradient(90deg,#FFD54F,#F57F17)"></div>
+      </div>
+    </div>
+    <!-- NO2 -->
+    <div class="glass pollutant-card" id="no2-card">
+      <div class="pollutant-name">NO₂</div>
+      <div class="pollutant-full-name">Nitrogen dioxide</div>
+      <div class="pollutant-value" id="no2-val">—</div>
+      <div class="pollutant-unit">μg/m³</div>
+      <div class="pollutant-bar-track">
+        <div class="pollutant-bar-fill" id="no2-bar"
+             style="width:0%;background:linear-gradient(90deg,#CE93D8,#7B1FA2)"></div>
+      </div>
+    </div>
+    <!-- SO2 -->
+    <div class="glass pollutant-card" id="so2-card">
+      <div class="pollutant-name">SO₂</div>
+      <div class="pollutant-full-name">Sulfur dioxide</div>
+      <div class="pollutant-value" id="so2-val">—</div>
+      <div class="pollutant-unit">μg/m³</div>
+      <div class="pollutant-bar-track">
+        <div class="pollutant-bar-fill" id="so2-bar"
+             style="width:0%;background:linear-gradient(90deg,#FFAB91,#E64A19)"></div>
+      </div>
+    </div>
+    <!-- CO -->
+    <div class="glass pollutant-card" id="co-card">
+      <div class="pollutant-name">CO</div>
+      <div class="pollutant-full-name">Carbon monoxide</div>
+      <div class="pollutant-value" id="co-val">—</div>
+      <div class="pollutant-unit">μg/m³</div>
+      <div class="pollutant-bar-track">
+        <div class="pollutant-bar-fill" id="co-bar"
+             style="width:0%;background:linear-gradient(90deg,#A5D6A7,#2E7D32)"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UV Index banner (from AQ API) -->
+  <div class="glass module-card" id="uv-banner"
+       style="flex-direction:row;align-items:center;gap:20px;min-height:0;padding:18px 20px;margin:0">
+    <span style="font-size:28px">☀️</span>
+    <div>
+      <div class="card-label" style="margin-bottom:4px">UV Index</div>
+      <div style="font-size:26px;font-weight:200;color:white">
+        <span id="aq-uv-num">—</span>
+        <span style="font-size:14px;color:rgba(255,255,255,0.6);margin-left:6px" id="aq-uv-cat"></span>
+      </div>
+    </div>
+    <div style="margin-left:auto;font-size:13px;color:rgba(255,255,255,0.5);max-width:220px;text-align:right"
+         id="uv-advice"></div>
+  </div>
+
+  <!-- AQI hourly chart -->
+  <div class="glass aqi-chart-card">
+    <div class="forecast-chart-title">
+      AQI Trend — Next 48 Hours
+    </div>
+    <canvas id="aqi-chart" height="160"></canvas>
+  </div>
+
+</main>
+
+<div id="loading-overlay"><div class="spinner"></div></div>
+<div id="toast" role="alert"></div>
+
+<script src="js/codes.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/api.js"></script>
+<script src="js/aqi.js"></script>
+</body>
+</html>

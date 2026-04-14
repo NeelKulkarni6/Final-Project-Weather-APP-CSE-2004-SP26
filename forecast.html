@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Forecast — Aura Weather</title>
+  <meta name="description" content="Extended 14-day weather forecast with hourly breakdowns and temperature trends." />
+
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/main.css" />
+</head>
+<body>
+
+<div id="weather-bg"></div>
+<div id="particles"></div>
+
+<nav class="site-nav">
+  <a href="index.html" class="nav-brand">
+    <span class="nav-brand-icon">🌤</span>
+    Aura
+  </a>
+
+  <div class="nav-links">
+    <a href="index.html"       class="nav-link">Weather</a>
+    <a href="forecast.html"    class="nav-link active">Forecast</a>
+    <a href="air-quality.html" class="nav-link">Air Quality</a>
+  </div>
+
+  <div class="nav-right">
+    <div class="unit-toggle" id="unit-toggle" role="group">
+      <span class="unit-opt active" data-unit="F">°F</span>
+      <span class="unit-opt"        data-unit="C">°C</span>
+    </div>
+  </div>
+</nav>
+
+<main class="page-wrapper page-enter">
+
+  <!-- Location heading -->
+  <div style="padding: 16px 4px 0; display:flex; align-items:baseline; gap:10px;">
+    <h1 id="page-city"
+        style="font-size:28px;font-weight:300;color:white;letter-spacing:-0.5px">—</h1>
+    <span id="page-date"
+          style="font-size:15px;color:rgba(255,255,255,0.55)">—</span>
+  </div>
+
+  <!-- Temperature chart card -->
+  <div class="glass forecast-chart-card">
+    <div class="forecast-chart-title">
+      Temperature Trend — 14 Days
+      <div class="chart-legend">
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#FF8A65"></div>
+          High
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#64B5F6"></div>
+          Low
+        </div>
+      </div>
+    </div>
+    <canvas id="temp-chart" height="200"></canvas>
+  </div>
+
+  <!-- 14-day list with expandable hourly rows -->
+  <div class="glass forecast-list-card" id="forecast-list">
+    <div class="section-label">Day-by-Day Forecast</div>
+    <div id="forecast-rows"></div>
+  </div>
+
+</main>
+
+<div id="loading-overlay"><div class="spinner"></div></div>
+<div id="toast" role="alert"></div>
+
+<script src="js/codes.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/api.js"></script>
+<script src="js/forecast.js"></script>
+</body>
+</html>
