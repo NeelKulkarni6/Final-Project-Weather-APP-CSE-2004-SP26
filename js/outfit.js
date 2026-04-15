@@ -27,7 +27,7 @@ async function outfitInit() {
   const el   = document.getElementById('outfit-location');
   if (el) el.textContent = loc.name + (loc.state ? ', ' + loc.state : '');
 
-  document.getElementById('outfit-loading').classList.add('active');
+  document.getElementById('loading-overlay').classList.add('active');
   try {
     const weather = await API.fetchWeather(loc.lat, loc.lon);
     OSTATE.weather = weather;
@@ -36,7 +36,7 @@ async function outfitInit() {
   } catch(e) {
     console.error(e);
   } finally {
-    document.getElementById('outfit-loading').classList.remove('active');
+    document.getElementById('loading-overlay').classList.remove('active');
   }
 }
 
