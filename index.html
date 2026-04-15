@@ -13,6 +13,12 @@
 <div id="weather-bg"></div>
 <div id="particles"></div>
 
+<div class="weather-ticker" id="weather-ticker">
+  <div class="ticker-track" id="ticker-track">
+    <span id="ticker-text">Loading weather summary...</span>
+    <span id="ticker-text-dupe" aria-hidden="true"></span>
+  </div>
+</div>
 <nav class="site-nav">
   <a href="index.html" class="nav-brand">
     <span class="nav-brand-icon">🌤</span>Aura
@@ -22,6 +28,10 @@
     <a href="forecast.html"    class="nav-link">Forecast</a>
     <a href="air-quality.html" class="nav-link">Air Quality</a>
     <a href="radar.html"       class="nav-link">Radar</a>
+    <a href="outfit.html"      class="nav-link">Wear</a>
+    <a href="timemachine.html" class="nav-link">History</a>
+    <a href="compare.html"     class="nav-link">Compare</a>
+    <a href="storms.html"      class="nav-link">Storms</a>
   </div>
   <div class="nav-right">
     <button id="pdf-btn" class="pdf-btn" title="Download PDF Report">↓ PDF</button>
@@ -42,6 +52,12 @@
     <span class="search-icon" aria-hidden="true">⌕</span>
     <div id="search-dropdown" class="search-dropdown glass" role="listbox"></div>
   </div>
+
+  <!-- Saved locations (shown directly under search) -->
+  <section class="saved-section" id="saved-section" style="display:none">
+    <div class="saved-heading">Saved Locations</div>
+    <div class="saved-grid" id="saved-grid"></div>
+  </section>
 
   <!-- Weather summary -->
   <div id="weather-summary" class="glass summary-card" style="display:none">
@@ -269,11 +285,8 @@
     <div id="daily-list" role="list"></div>
   </div>
 
-  <!-- Saved locations -->
-  <section class="saved-section" id="saved-section" style="display:none">
-    <div class="saved-heading">Saved Locations</div>
-    <div class="saved-grid" id="saved-grid"></div>
-  </section>
+  <!-- Footer -->
+  <footer class="page-footer">Created by Neel Kulkarni</footer>
 
 </main>
 

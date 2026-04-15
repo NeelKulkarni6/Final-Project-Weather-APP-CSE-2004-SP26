@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Weather History — Aura Weather</title>
+  <link rel="stylesheet" href="css/animations.css"/>
+  <link rel="stylesheet" href="css/main.css"/>
+  <style>
+    .tm-page { max-width: 720px; margin: 0 auto; padding: 0 16px 80px; }
+    .tm-heading { font-size: 28px; font-weight: 300; color: white; letter-spacing: -0.5px; margin: 20px 0 4px; }
+    .tm-sub { font-size: 14px; color: rgba(255,255,255,0.40); margin-bottom: 20px; }
+
+    .tm-picker-card { padding: 20px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 14px; }
+    .tm-loc-row { display: flex; align-items: center; gap: 10px; }
+    .tm-loc-icon { font-size: 18px; }
+    .tm-loc-name { font-size: 16px; font-weight: 600; color: white; }
+    .tm-loc-hint { font-size: 12px; color: rgba(255,255,255,0.35); }
+    .tm-input-row { display: flex; gap: 10px; align-items: center; }
+    #tm-date { flex: 1; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18); border-radius: 12px; padding: 11px 14px; font-size: 15px; color: white; font-family: inherit; outline: none; cursor: pointer; transition: border-color 0.15s; }
+    #tm-date:focus { border-color: rgba(255,255,255,0.38); }
+    #tm-date::-webkit-calendar-picker-indicator { filter: invert(0.7); cursor: pointer; }
+    #tm-go { padding: 11px 22px; border-radius: 12px; background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.22); color: white; font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+    #tm-go:hover { background: rgba(255,255,255,0.22); }
+
+    /* Result */
+    .tm-result-hero { padding: 22px 24px; margin-bottom: 12px; }
+    .tm-date-header { font-size: 13px; color: rgba(255,255,255,0.45); margin-bottom: 4px; }
+    .tm-ago-chip { display: inline-block; padding: 3px 10px; border-radius: 20px; background: rgba(255,255,255,0.10); border: 1px solid rgba(255,255,255,0.14); font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.55); margin-bottom: 14px; }
+    .tm-hero-row { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+    #tm-icon { font-size: 52px; line-height: 1; }
+    .tm-temp-block { display: flex; flex-direction: column; gap: 4px; }
+    .tm-hilo { display: flex; gap: 12px; }
+    .tm-hi { font-size: 22px; font-weight: 300; color: #FFB74D; }
+    .tm-lo { font-size: 22px; font-weight: 300; color: #90CAF9; }
+    .tm-condition-label { font-size: 15px; color: rgba(255,255,255,0.60); }
+
+    .tm-stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 16px; }
+    .tm-stat { background: rgba(0,0,0,0.18); border-radius: 12px; padding: 10px 12px; }
+    .tm-stat-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: rgba(255,255,255,0.35); margin-bottom: 4px; }
+    .tm-stat-val { font-size: 17px; font-weight: 500; color: white; }
+
+    .tm-chart-card { padding: 20px; margin-bottom: 12px; }
+    .tm-chart-title { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: rgba(255,255,255,0.40); margin-bottom: 14px; }
+    #tm-chart { width: 100%; display: block; }
+
+    .tm-narrative-card { padding: 18px 20px; }
+    .tm-narrative-text { font-size: 14px; color: rgba(255,255,255,0.70); line-height: 1.7; }
+
+    #tm-error { padding: 14px 18px; background: rgba(180,40,40,0.15); border: 1px solid rgba(180,40,40,0.30); border-radius: 14px; color: rgba(255,180,180,0.80); font-size: 14px; display: none; margin-top: 12px; }
+
+    @media (max-width: 520px) {
+      .tm-stats-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div id="weather-bg" class="bg-partly-day"></div>
+<div id="particles" aria-hidden="true"></div>
+
+<nav class="site-nav">
+  <a href="index.html" class="nav-brand"><span class="nav-brand-icon">🌤</span>Aura</a>
+  <div class="nav-links">
+    <a href="index.html"       class="nav-link">Weather</a>
+    <a href="forecast.html"    class="nav-link">Forecast</a>
+    <a href="air-quality.html" class="nav-link">Air Quality</a>
+    <a href="radar.html"       class="nav-link">Radar</a>
+    <a href="outfit.html"      class="nav-link">Wear</a>
+    <a href="timemachine.html" class="nav-link active">History</a>
+    <a href="compare.html"     class="nav-link">Compare</a>
+    <a href="storms.html"      class="nav-link">Storms</a>
+  </div>
+  <div class="nav-right">
+    <div class="unit-toggle" id="unit-toggle" role="group">
+      <span class="unit-opt active" data-unit="F">°F</span>
+      <span class="unit-opt"        data-unit="C">°C</span>
+    </div>
+  </div>
+</nav>
+
+<div class="tm-page page-enter">
+  <h1 class="tm-heading">Weather History</h1>
+  <p class="tm-sub">Look up the weather on any day in the past year.</p>
+
+  <div class="glass tm-picker-card">
+    <div class="tm-loc-row">
+      <span class="tm-loc-icon">📍</span>
+      <div>
+        <div class="tm-loc-name" id="tm-location">Loading...</div>
+        <div class="tm-loc-hint">Based on your saved location — change it on the Weather tab.</div>
+      </div>
+    </div>
+    <div class="tm-input-row">
+      <input type="date" id="tm-date" />
+      <button id="tm-go">Look Up</button>
+    </div>
+  </div>
+
+  <div id="tm-error">Could not load historical data for that date. Please try another date.</div>
+
+  <div id="tm-result" style="display:none">
+    <div class="glass tm-result-hero">
+      <div class="tm-date-header" id="tm-date-label"></div>
+      <div class="tm-ago-chip" id="tm-ago-label"></div>
+      <div class="tm-hero-row">
+        <div id="tm-icon">—</div>
+        <div class="tm-temp-block">
+          <div class="tm-hilo">
+            <div class="tm-hi" id="tm-high">—</div>
+            <div class="tm-lo" id="tm-low">—</div>
+          </div>
+          <div class="tm-condition-label" id="tm-condition">—</div>
+        </div>
+      </div>
+      <div class="tm-stats-grid">
+        <div class="tm-stat"><div class="tm-stat-label">Precipitation</div><div class="tm-stat-val" id="tm-precip">—</div></div>
+        <div class="tm-stat"><div class="tm-stat-label">Max Wind</div><div class="tm-stat-val" id="tm-wind-max">—</div></div>
+        <div class="tm-stat"><div class="tm-stat-label">Max Gusts</div><div class="tm-stat-val" id="tm-gusts">—</div></div>
+        <div class="tm-stat"><div class="tm-stat-label">Sunshine</div><div class="tm-stat-val" id="tm-sunshine">—</div></div>
+        <div class="tm-stat"><div class="tm-stat-label">Precip Hours</div><div class="tm-stat-val" id="tm-precip-hours">—</div></div>
+        <div class="tm-stat"><div class="tm-stat-label">Sunrise</div><div class="tm-stat-val" id="tm-sunrise">—</div></div>
+        <div class="tm-stat"><div class="tm-stat-label">Sunset</div><div class="tm-stat-val" id="tm-sunset">—</div></div>
+      </div>
+    </div>
+
+    <div class="glass tm-chart-card">
+      <div class="tm-chart-title">Hourly Temperature &amp; Precipitation</div>
+      <canvas id="tm-chart"></canvas>
+    </div>
+
+    <div class="glass tm-narrative-card">
+      <p class="tm-narrative-text" id="tm-narrative">—</p>
+    </div>
+  </div>
+</div>
+
+<div id="loading-overlay"><div class="spinner"></div></div>
+<div id="toast" role="alert"></div>
+
+<script src="js/codes.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/api.js"></script>
+<script src="js/timemachine.js"></script>
+</body>
+</html>

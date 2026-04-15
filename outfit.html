@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>What Should I Wear — Aura Weather</title>
+  <link rel="stylesheet" href="css/animations.css"/>
+  <link rel="stylesheet" href="css/main.css"/>
+  <style>
+    /* ── Outfit page specific ─────────────────────── */
+    .outfit-page { max-width: 900px; margin: 0 auto; padding: 0 16px 80px; }
+
+    /* Context bar */
+    .outfit-context-bar {
+      display: flex; align-items: center; gap: 16px;
+      padding: 14px 20px; margin: 12px 0;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 16px; backdrop-filter: blur(20px);
+    }
+    .outfit-location-name {
+      font-size: 15px; font-weight: 600; color: rgba(255,255,255,0.9);
+    }
+    .outfit-temp-display {
+      font-size: 28px; font-weight: 200; color: white; letter-spacing: -1px;
+      margin-left: auto;
+    }
+    .outfit-condition-text {
+      font-size: 14px; color: rgba(255,255,255,0.6);
+    }
+    .outfit-feels-text {
+      font-size: 12px; color: rgba(255,255,255,0.4);
+      border-left: 1px solid rgba(255,255,255,0.15); padding-left: 16px;
+    }
+
+    /* Gender selector */
+    .gender-selector {
+      display: flex; gap: 12px; margin: 16px 0;
+    }
+    .gender-card {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      gap: 14px; padding: 18px 24px; border-radius: 18px; cursor: pointer;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.14);
+      transition: all 0.2s ease; font-family: inherit;
+      color: rgba(255,255,255,0.55); font-size: 15px; font-weight: 600;
+    }
+    .gender-card:hover { background: rgba(255,255,255,0.12); color: white; }
+    .gender-card.active {
+      background: rgba(255,255,255,0.18);
+      border-color: rgba(255,255,255,0.38);
+      color: white;
+    }
+    .gender-figure {
+      width: 40px; height: 52px; flex-shrink: 0;
+    }
+
+    /* Outfit grid */
+    .outfit-grid { margin: 8px 0; }
+    .outfit-section { margin-bottom: 24px; }
+    .outfit-section-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.8px;
+      text-transform: uppercase; color: rgba(255,255,255,0.4);
+      margin-bottom: 10px; padding: 0 2px;
+    }
+    .outfit-items-row {
+      display: flex; gap: 10px; flex-wrap: wrap;
+    }
+    .outfit-item-card {
+      display: flex; flex-direction: column; align-items: center;
+      padding: 16px 12px 14px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-top-color: rgba(255,255,255,0.20);
+      border-radius: 18px; min-width: 120px; max-width: 140px; flex: 1;
+      backdrop-filter: blur(16px);
+      transition: transform 0.2s ease, background 0.2s ease;
+      animation: card-in 0.35s ease both;
+      cursor: default;
+    }
+    .outfit-item-card:hover {
+      transform: translateY(-3px);
+      background: rgba(255,255,255,0.12);
+    }
+    .outfit-icon {
+      width: 80px; height: 68px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 10px;
+    }
+    .outfit-icon svg { width: 100%; height: 100%; overflow: visible; }
+    .outfit-item-label {
+      font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.9);
+      text-align: center; margin-bottom: 5px;
+    }
+    .outfit-item-reason {
+      font-size: 10.5px; color: rgba(255,255,255,0.40);
+      text-align: center; line-height: 1.45;
+    }
+
+    /* Advisories */
+    .outfit-advisories { display: flex; flex-direction: column; gap: 8px; margin: 16px 0 0; }
+    .outfit-advisory {
+      display: flex; align-items: center; gap: 14px;
+      padding: 12px 16px; border-radius: 14px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.10);
+    }
+    .advisory-icon { flex-shrink: 0; width: 22px; height: 22px; }
+    .advisory-text { font-size: 13.5px; color: rgba(255,255,255,0.75); line-height: 1.45; }
+
+    /* Page heading */
+    .outfit-page-heading {
+      font-size: 28px; font-weight: 300; color: white;
+      letter-spacing: -0.5px; margin: 20px 0 4px; line-height: 1.2;
+    }
+    .outfit-page-sub {
+      font-size: 14px; color: rgba(255,255,255,0.45); margin-bottom: 16px;
+    }
+
+    @media (max-width: 600px) {
+      .outfit-items-row { gap: 8px; }
+      .outfit-item-card { min-width: 100px; padding: 12px 8px 10px; }
+      .gender-card { padding: 14px 16px; font-size: 14px; }
+      .outfit-feels-text { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="weather-bg"></div>
+<div id="particles" aria-hidden="true"></div>
+
+<nav class="site-nav">
+  <a href="index.html" class="nav-brand">
+    <span class="nav-brand-icon">🌤</span>Aura
+  </a>
+  <div class="nav-links">
+    <a href="index.html"       class="nav-link">Weather</a>
+    <a href="forecast.html"    class="nav-link">Forecast</a>
+    <a href="air-quality.html" class="nav-link">Air Quality</a>
+    <a href="radar.html"       class="nav-link">Radar</a>
+    <a href="outfit.html"      class="nav-link active">Wear</a>
+    <a href="timemachine.html" class="nav-link">History</a>
+    <a href="compare.html"     class="nav-link">Compare</a>
+    <a href="storms.html"      class="nav-link">Storms</a>
+  </div>
+  <div class="nav-right">
+    <div class="unit-toggle" id="unit-toggle" role="group">
+      <span class="unit-opt active" data-unit="F">°F</span>
+      <span class="unit-opt"        data-unit="C">°C</span>
+    </div>
+  </div>
+</nav>
+
+<div class="outfit-page page-enter">
+
+  <h1 class="outfit-page-heading">What Should I Wear?</h1>
+  <p class="outfit-page-sub">Outfit recommendations based on today's forecast.</p>
+
+  <!-- Weather context -->
+  <div class="outfit-context-bar glass">
+    <div>
+      <div class="outfit-location-name" id="outfit-location">Loading...</div>
+      <div class="outfit-condition-text" id="outfit-condition">—</div>
+    </div>
+    <div class="outfit-feels-text" id="outfit-feels">—</div>
+    <div class="outfit-temp-display" id="outfit-temp">—</div>
+  </div>
+
+  <!-- Gender selector -->
+  <div class="gender-selector">
+
+    <button class="gender-card active" data-gender="male">
+      <svg class="gender-figure" viewBox="0 0 40 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="20" cy="9" r="7" stroke="currentColor" stroke-width="2.2" fill="none"/>
+        <path d="M20,16 L20,34 M13,20 L27,20 M20,34 L14,50 M20,34 L26,50"
+              stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+      </svg>
+      Male
+    </button>
+
+    <button class="gender-card" data-gender="female">
+      <svg class="gender-figure" viewBox="0 0 40 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="20" cy="9" r="7" stroke="currentColor" stroke-width="2.2" fill="none"/>
+        <path d="M20,16 L14,36 L26,36 Z" stroke="currentColor" stroke-width="2.2"
+              stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <line x1="14" y1="36" x2="11" y2="50" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+        <line x1="26" y1="36" x2="29" y2="50" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+      </svg>
+      Female
+    </button>
+
+  </div>
+
+  <!-- Outfit grid -->
+  <div class="outfit-grid" id="outfit-grid"></div>
+
+  <!-- Condition advisories -->
+  <div class="outfit-advisories" id="outfit-advisories"></div>
+
+</div>
+
+<div id="loading-overlay" id="outfit-loading"><div class="spinner"></div></div>
+<div id="toast" role="alert"></div>
+
+<script src="js/codes.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/api.js"></script>
+<script src="js/outfit.js"></script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Current Storms — Aura Weather</title>
+  <link rel="stylesheet" href="css/animations.css"/>
+  <link rel="stylesheet" href="css/main.css"/>
+  <style>
+    .storms-page { max-width: 960px; margin: 0 auto; padding: 0 16px 80px; }
+    .storms-heading { font-size: 28px; font-weight: 300; color: white; letter-spacing: -0.5px; margin: 20px 0 4px; }
+    .storms-sub { font-size: 14px; color: rgba(255,255,255,0.40); margin-bottom: 20px; display: flex; align-items: center; gap: 16px; }
+    #storms-updated { font-size: 12px; color: rgba(255,255,255,0.28); margin-left: auto; }
+    #storms-refresh { padding: 6px 14px; border-radius: 14px; background: rgba(255,255,255,0.10); border: 1px solid rgba(255,255,255,0.16); color: rgba(255,255,255,0.65); font-size: 12px; font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.15s; }
+    #storms-refresh:hover { background: rgba(255,255,255,0.18); color: white; }
+    #storms-refresh:disabled { opacity: 0.4; cursor: default; }
+
+    .storms-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .storm-card { padding: 20px; border-radius: 20px; position: relative; overflow: hidden; animation: card-in 0.4s ease both; }
+    .storm-rank { position: absolute; top: 16px; right: 18px; font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.20); letter-spacing: 0.5px; }
+    .storm-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 6px; gap: 10px; }
+    .storm-city { font-size: 20px; font-weight: 600; color: white; line-height: 1.2; }
+    .storm-country { font-size: 12px; color: rgba(255,255,255,0.45); margin-top: 2px; }
+    .storm-badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; border: 1px solid; letter-spacing: 0.3px; flex-shrink: 0; }
+    .storm-type-label { font-size: 13px; color: rgba(255,255,255,0.55); margin-bottom: 14px; font-weight: 500; }
+    .storm-icon-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .storm-temp-display { font-size: 52px; font-weight: 200; color: white; letter-spacing: -2px; line-height: 1; }
+    .storm-metrics { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px; margin-bottom: 14px; }
+    .storm-metric { background: rgba(0,0,0,0.20); border-radius: 10px; padding: 8px 6px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+    .storm-metric svg { color: rgba(255,255,255,0.45); }
+    .sm-value { font-size: 14px; font-weight: 600; color: white; line-height: 1; }
+    .sm-unit { font-size: 10px; font-weight: 400; }
+    .sm-label { font-size: 9px; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.4px; }
+    .storm-severity-bar { display: flex; gap: 4px; margin-bottom: 8px; }
+    .severity-seg { flex: 1; height: 3px; border-radius: 2px; background: rgba(255,255,255,0.12); transition: background 0.4s; }
+    .storm-coords { font-size: 10px; color: rgba(255,255,255,0.22); letter-spacing: 0.3px; }
+
+    @media (max-width: 620px) {
+      .storms-grid { grid-template-columns: 1fr; }
+      .storm-temp-display { font-size: 40px; }
+    }
+  </style>
+</head>
+<body>
+<div id="weather-bg" class="bg-cloudy-day"></div>
+<div id="particles" aria-hidden="true"></div>
+
+<nav class="site-nav">
+  <a href="index.html" class="nav-brand"><span class="nav-brand-icon">🌤</span>Aura</a>
+  <div class="nav-links">
+    <a href="index.html"       class="nav-link">Weather</a>
+    <a href="forecast.html"    class="nav-link">Forecast</a>
+    <a href="air-quality.html" class="nav-link">Air Quality</a>
+    <a href="radar.html"       class="nav-link">Radar</a>
+    <a href="outfit.html"      class="nav-link">Wear</a>
+    <a href="timemachine.html" class="nav-link">History</a>
+    <a href="compare.html"     class="nav-link">Compare</a>
+    <a href="storms.html"      class="nav-link active">Storms</a>
+  </div>
+  <div class="nav-right">
+    <div class="unit-toggle" id="unit-toggle" role="group">
+      <span class="unit-opt active" data-unit="F">°F</span>
+      <span class="unit-opt"        data-unit="C">°C</span>
+    </div>
+  </div>
+</nav>
+
+<div class="storms-page page-enter">
+  <h1 class="storms-heading">Current Storms</h1>
+  <div class="storms-sub">
+    Top 4 active storm systems worldwide, at least 250 miles apart.
+    <button id="storms-refresh">Refresh</button>
+    <span id="storms-updated"></span>
+  </div>
+  <div class="storms-grid" id="storms-grid"></div>
+</div>
+
+<div id="loading-overlay" id="storms-loading"><div class="spinner"></div></div>
+<div id="toast" role="alert"></div>
+
+<script src="js/codes.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/api.js"></script>
+<script src="js/storms.js"></script>
+</body>
+</html>

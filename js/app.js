@@ -15,12 +15,25 @@ const STATE = {
   clockTimer: null,
 };
 
+const DEFAULT_SAVED = [
+  { name:'San Francisco', state:'California', country:'US', lat:37.7749, lon:-122.4194, timezone:'America/Los_Angeles', temp:'—', condition:'—', emoji:'🌤' },
+  { name:'Chicago',       state:'Illinois',   country:'US', lat:41.8781, lon:-87.6298,  timezone:'America/Chicago',     temp:'—', condition:'—', emoji:'🌤' },
+  { name:'St. Louis',     state:'Missouri',   country:'US', lat:38.6270, lon:-90.1994,  timezone:'America/Chicago',     temp:'—', condition:'—', emoji:'🌤' },
+  { name:'London',        state:'England',    country:'GB', lat:51.5074, lon:-0.1278,   timezone:'Europe/London',       temp:'—', condition:'—', emoji:'🌤' },
+  { name:'Shanghai',      state:'Shanghai',   country:'CN', lat:31.2304, lon:121.4737,  timezone:'Asia/Shanghai',       temp:'—', condition:'—', emoji:'🌤' },
+  { name:'New Delhi',     state:'Delhi',      country:'IN', lat:28.6139, lon:77.2090,   timezone:'Asia/Kolkata',        temp:'—', condition:'—', emoji:'🌤' },
+  { name:'Dubai',         state:'Dubai',      country:'AE', lat:25.2048, lon:55.2708,   timezone:'Asia/Dubai',          temp:'—', condition:'—', emoji:'🌤' },
+  { name:'New York',      state:'New York',   country:'US', lat:40.7128, lon:-74.0060,  timezone:'America/New_York',    temp:'—', condition:'—', emoji:'🌤' },
+];
+
 document.addEventListener('DOMContentLoaded', init);
 
 async function init() {
-  STATE.unit     = lsGet(LS.UNIT,     'F');
-  STATE.saved    = lsGet(LS.SAVED,    []);
-  const stored   = lsGet(LS.LOCATION, null);
+  STATE.unit  = lsGet(LS.UNIT, 'F');
+  STATE.saved = lsGet(LS.SAVED, null);
+  // First ever visit: seed defaults
+  if (!STATE.saved) { STATE.saved = DEFAULT_SAVED.map(s => ({...s})); lsSet(LS.SAVED, STATE.saved); }
+  const stored = lsGet(LS.LOCATION, null);
   if (stored) STATE.location = stored;
 
   syncUnitToggle();
@@ -32,6 +45,7 @@ async function init() {
   initPDFBtn();
 
   await loadWeather();
+  refreshSavedTiles();
 }
 
 /* ── Load ─────────────────────────────────────────── */
@@ -54,6 +68,7 @@ async function loadWeather() {
     renderFunFact();
     renderWeatherSummary(weather);
     startClock();
+    startTicker(weather, STATE.location, STATE.unit);
     renderSaved();
   } catch (err) {
     console.error(err);
@@ -733,3 +748,78 @@ function showToast(msg, isError = false) {
   clearTimeout(toastTimer); toastTimer = setTimeout(() => { el.className=''; }, 3000);
 }
 function setText(id, val) { const el=document.getElementById(id); if(el) el.textContent=val; }
+
+/* ── Async-refresh saved tile weather data ────────── */
+async function refreshSavedTiles() {
+  if (!STATE.saved.length) return;
+  const u = STATE.unit;
+  // Fetch in parallel, update tiles as each resolves
+  STATE.saved.forEach(async (s, idx) => {
+    try {
+      const w    = await API.fetchWeather(s.lat, s.lon);
+      const info = getWeatherInfo(w.current.weather_code);
+      STATE.saved[idx].temp      = convertTemp(w.current.temperature_2m, u);
+      STATE.saved[idx].condition = info.label;
+      STATE.saved[idx].emoji     = info.emoji;
+      lsSet(LS.SAVED, STATE.saved);
+      renderSaved(); // re-render after each resolves
+    } catch (_) {}
+  });
+}
+
+/* ── Scrolling weather ticker ─────────────────────── */
+function buildTickerText(weather, location, unit) {
+  const c   = weather.current;
+  const d   = weather.daily;
+  const tz  = location.timezone;
+  const u   = unit;
+  const info  = getWeatherInfo(c.weather_code);
+  const temp  = convertTemp(c.temperature_2m, u);
+  const feels = convertTemp(c.apparent_temperature, u);
+  const hi0   = convertTemp(d.temperature_2m_max[0], u);
+  const lo0   = convertTemp(d.temperature_2m_min[0], u);
+  const wind  = kmhToMph(c.wind_speed_10m);
+  const dir   = degreesToCardinal(c.wind_direction_10m);
+  const uv    = c.uv_index ?? d.uv_index_max?.[0] ?? 0;
+  const uvCat = uvDescription(uv).label;
+  const hum   = c.relative_humidity_2m;
+
+  // Rain outlook
+  const rainDays = d.precipitation_probability_max.slice(0,7).map((p,i) => ({p,i})).filter(x => x.p >= 40);
+  let rainNote = '';
+  if (!rainDays.length) rainNote = 'Dry conditions expected through the week.';
+  else if (rainDays[0].i === 0) rainNote = `Rain likely today with a ${rainDays[0].p}% chance.`;
+  else rainNote = `Rain possible ${formatDayShort(d.time[rainDays[0].i], tz).toLowerCase()} (${rainDays[0].p}%).`;
+
+  // Week temp trend
+  const n   = d.temperature_2m_max.length;
+  const hi5 = convertTemp(d.temperature_2m_max[Math.min(5,n-1)], u);
+  const delta = hi5 - hi0;
+  let trendNote = '';
+  if (delta >= 8) trendNote = ` Warming trend ahead, reaching ${hi5}\u00b0${u} by ${formatDayShort(d.time[Math.min(5,n-1)], tz)}.`;
+  else if (delta <= -8) trendNote = ` A cool-down arrives later this week, dropping to ${hi5}\u00b0${u}.`;
+
+  const cityName = location.name + (location.state ? ', ' + location.state : '');
+  return `${cityName}: Currently ${temp}\u00b0${u} and ${info.label.toLowerCase()} \u2014 feels like ${feels}\u00b0${u}. Today\u2019s high ${hi0}\u00b0, low ${lo0}\u00b0${u}. Humidity ${hum}%. Winds ${dir} at ${wind} mph. UV index ${Math.round(uv)} (${uvCat}). ${rainNote}${trendNote}`;
+}
+
+function startTicker(weather, location, unit) {
+  const textEl  = document.getElementById('ticker-text');
+  const dupeEl  = document.getElementById('ticker-text-dupe');
+  const track   = document.getElementById('ticker-track');
+  if (!textEl || !track) return;
+
+  const content = buildTickerText(weather, location, unit);
+  const spacer  = '\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u2605\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0';
+  textEl.textContent  = content + spacer;
+  dupeEl.textContent  = content + spacer;
+
+  // Calculate duration from text pixel width (target ~50px/s)
+  requestAnimationFrame(() => {
+    const PPS   = 55; // pixels per second — comfortable reading speed
+    const width = textEl.offsetWidth;
+    const dur   = Math.max(20, width / PPS);
+    track.style.animationDuration = dur + 's';
+    track.classList.add('running');
+  });
+}

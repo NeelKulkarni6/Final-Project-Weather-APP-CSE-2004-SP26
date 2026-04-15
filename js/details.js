@@ -34,11 +34,7 @@ function closeDetail() {
 function initDetailModal() {
   document.getElementById('detail-close').addEventListener('click', closeDetail);
   document.getElementById('detail-backdrop').addEventListener('click', closeDetail);
-  let startY = 0;
-  const sheet = document.querySelector('.detail-sheet');
-  if (!sheet) return;
-  sheet.addEventListener('touchstart', e => { startY = e.touches[0].clientY; }, { passive:true });
-  sheet.addEventListener('touchend',   e => { if (e.changedTouches[0].clientY - startY > 80) closeDetail(); }, { passive:true });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
 }
 
 /* ── Render ───────────────────────────────────────── */
@@ -212,7 +208,7 @@ function drawYAxis(ctx, W, H, PAD, ticks, suffix, yOf) {
     const y = yOf(v);
     ctx.strokeStyle='rgba(255,255,255,0.08)'; ctx.lineWidth=1; ctx.setLineDash([]);
     ctx.beginPath(); ctx.moveTo(PAD.left, y); ctx.lineTo(W-PAD.right, y); ctx.stroke();
-    ctx.fillStyle='rgba(255,255,255,0.45)'; ctx.fillText(`${v}${suffix}`, W-2, y+3.5);
+    ctx.fillStyle='rgba(255,255,255,0.45)'; ctx.fillText(`${v}${suffix}`, W-6, y+3.5);
   });
 }
 
@@ -231,7 +227,7 @@ function drawPrecipChart(ctx, W, H, indices) {
   const h    = STATE.weather.hourly;
   const vals = indices.map(i => h.precipitation_probability?.[i]??0);
   const n    = vals.length; if(!n) return;
-  const PAD  = {top:12, bottom:28, left:10, right:46};
+  const PAD  = {top:12, bottom:28, left:10, right:72};
   const iW   = W-PAD.left-PAD.right, iH = H-PAD.top-PAD.bottom;
   const xOf  = i => PAD.left + (i/Math.max(n-1,1))*iW;
   const yOf  = v => PAD.top  + (1-v/100)*iH;
@@ -260,7 +256,7 @@ function drawUVChart(ctx, W, H, indices) {
   const h    = STATE.weather.hourly;
   const vals = indices.map(i => h.uv_index?.[i]??0);
   const n    = vals.length; if(!n) return;
-  const PAD  = {top:18, bottom:28, left:10, right:76};
+  const PAD  = {top:18, bottom:28, left:10, right:96};
   const iW   = W-PAD.left-PAD.right, iH = H-PAD.top-PAD.bottom;
   const maxY = 12;
   const xOf  = i => PAD.left+(i/Math.max(n-1,1))*iW;
@@ -359,7 +355,7 @@ function drawHumidityChart(ctx, W, H, indices) {
   const h    = STATE.weather.hourly;
   const vals = indices.map(i => h.relative_humidity_2m?.[i]??0);
   const n    = vals.length; if(!n) return;
-  const PAD  = {top:12, bottom:28, left:10, right:50};
+  const PAD  = {top:12, bottom:28, left:10, right:72};
   const iW   = W-PAD.left-PAD.right, iH=H-PAD.top-PAD.bottom;
   const xOf  = i => PAD.left+(i/Math.max(n-1,1))*iW;
   const yOf  = v => PAD.top+(1-v/100)*iH;
@@ -408,7 +404,7 @@ function drawFeelsLikeChart(ctx, W, H, indices) {
   const raw  = indices.map(i => h.apparent_temperature?.[i] ?? h.temperature_2m?.[i] ?? 0);
   const vals = raw.map(v => convertTemp(v, u));
   const n    = vals.length; if(!n) return;
-  const PAD  = {top:12, bottom:28, left:10, right:46};
+  const PAD  = {top:12, bottom:28, left:10, right:72};
   const iW   = W-PAD.left-PAD.right, iH=H-PAD.top-PAD.bottom;
   const minV = Math.min(...vals)-5, maxV=Math.max(...vals)+5;
   const xOf  = i => PAD.left+(i/Math.max(n-1,1))*iW;
@@ -429,7 +425,7 @@ function drawVisibilityChart(ctx, W, H, indices) {
   const h    = STATE.weather.hourly;
   const vals = indices.map(i => parseFloat(metersToMiles(h.visibility?.[i]??10000)));
   const n    = vals.length; if(!n) return;
-  const PAD  = {top:12, bottom:28, left:10, right:50};
+  const PAD  = {top:12, bottom:28, left:10, right:72};
   const iW   = W-PAD.left-PAD.right, iH=H-PAD.top-PAD.bottom;
   const maxV = Math.max(Math.max(...vals)+1, 11);
   const xOf  = i => PAD.left+(i/Math.max(n-1,1))*iW;
@@ -445,7 +441,7 @@ function drawPressureChart(ctx, W, H, indices) {
   const h    = STATE.weather.hourly;
   const vals = indices.map(i => Math.round(h.surface_pressure?.[i]??1013));
   const n    = vals.length; if(!n) return;
-  const PAD  = {top:12, bottom:28, left:10, right:50};
+  const PAD  = {top:12, bottom:28, left:10, right:72};
   const iW   = W-PAD.left-PAD.right, iH=H-PAD.top-PAD.bottom;
   const minV = Math.min(...vals)-3, maxV=Math.max(...vals)+3;
   const xOf  = i => PAD.left+(i/Math.max(n-1,1))*iW;
@@ -464,7 +460,7 @@ function drawCloudChart(ctx, W, H, indices) {
   const h    = STATE.weather.hourly;
   const vals = indices.map(i => h.cloud_cover?.[i]??0);
   const n    = vals.length; if(!n) return;
-  const PAD  = {top:12, bottom:28, left:10, right:46};
+  const PAD  = {top:12, bottom:28, left:10, right:72};
   const iW   = W-PAD.left-PAD.right, iH=H-PAD.top-PAD.bottom;
   const xOf  = i => PAD.left+(i/Math.max(n-1,1))*iW;
   const yOf  = v => PAD.top+(1-v/100)*iH;
