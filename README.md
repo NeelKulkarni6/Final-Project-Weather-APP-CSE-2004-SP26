@@ -1,7 +1,10 @@
 # Aura Weather
+This website was created by Neel Kulkarni, a junior studying finance and cs at WashU. he made this for the class CSE2004 "Web Dev"
 
-A fully handcoded weather web app with an Apple Liquid Glass aesthetic,
+This is A   weather web app with an Apple Liquid Glass aesthetic,
 built for CSE 2004 final project.
+
+About half of the code was made in Claude and half was written by hand (mostly the HTML and CSS)
 
 ## Features
 
@@ -28,53 +31,3 @@ built for CSE 2004 final project.
 
 All APIs are free with no API key required.
 
-## File Structure
-
-```
-aura-weather/
-├── index.html           Main weather dashboard
-├── forecast.html        14-day forecast + temperature chart
-├── air-quality.html     AQI ring, pollutant cards, hourly chart
-├── css/
-│   ├── main.css         Design system, glass cards, all components
-│   └── animations.css   Weather backgrounds, rain, snow, stars, particles
-└── js/
-    ├── codes.js         WMO weather code → label/emoji/bg-theme mapping
-    ├── utils.js         Unit conversions, time formatting, SVG geometry helpers
-    ├── api.js           All external API fetch functions
-    ├── app.js           index.html controller
-    ├── forecast.js      forecast.html controller
-    └── aqi.js           air-quality.html controller
-```
-
-## Deploying to GitHub Pages
-
-1. Create a new GitHub repository
-2. Push all files (keeping the folder structure above)
-3. Go to **Settings → Pages**
-4. Under **Source**, select `main` branch, root folder `/`
-5. Click Save — your site will be live at `https://<username>.github.io/<repo-name>/`
-
-> **Note:** All APIs use HTTPS and have CORS enabled, so they work from
-> GitHub Pages without a backend.
-
-## Design Language
-
-The visual style is inspired by Apple's **Liquid Glass** design introduced at
-WWDC 2025 — achieved via:
-- `backdrop-filter: blur(24px) saturate(180%)` on all glass surfaces
-- Multi-layer `box-shadow` with inner highlight + outer depth
-- `rgba(255,255,255,0.10)` base background with `0.18` border opacity
-- Specular highlight via `::before` gradient overlay on every glass card
-- CSS animated gradient backgrounds with dynamic particle overlays (JS)
-
-## Local Development
-
-No build step needed. Open `index.html` directly in a browser or serve
-with any static server:
-
-```bash
-npx serve .
-# or
-python3 -m http.server
-```
