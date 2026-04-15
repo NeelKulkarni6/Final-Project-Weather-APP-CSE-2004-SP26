@@ -89,7 +89,7 @@ async function compareNow() {
     const msg = !CMPSTATE.cityA ? 'Select a first city.' : 'Select a second city.';
     showToastCmp(msg, true); return;
   }
-  document.getElementById('cmp-loading').classList.add('active');
+  document.getElementById('loading-overlay').classList.add('active');
   document.getElementById('cmp-result').style.display = 'none';
   try {
     const [wA, wB] = await Promise.all([
@@ -101,7 +101,7 @@ async function compareNow() {
   } catch (err) {
     console.error(err); showToastCmp('Could not load weather data.', true);
   } finally {
-    document.getElementById('cmp-loading').classList.remove('active');
+    document.getElementById('loading-overlay').classList.remove('active');
   }
 }
 
@@ -113,6 +113,16 @@ function renderComparison() {
   const dA = wA.daily,   dB = wB.daily;
   const iA = getWeatherInfo(cA.weather_code);
   const iB = getWeatherInfo(cB.weather_code);
+
+  // Legend names
+  setText('legend-a-name',  CMPSTATE.cityA.name);
+  setText('legend-b-name',  CMPSTATE.cityB.name);
+  setText('chart-legend-a', CMPSTATE.cityA.name);
+  setText('chart-legend-b', CMPSTATE.cityB.name);
+
+  // Color-code hero borders
+  document.getElementById('cmp-hero-a').style.borderTopColor = 'rgba(100,181,246,0.5)';
+  document.getElementById('cmp-hero-b').style.borderTopColor = 'rgba(244,143,177,0.5)';
 
   // Heroes
   renderHero('a', CMPSTATE.cityA, cA, dA, iA, u);
@@ -135,9 +145,10 @@ function renderComparison() {
     (dB.precipitation_sum?.[0]||0).toFixed(1)*1, 0, 40, ' mm', 'lowerBetter', 'Precip Today');
 
   // 7-day forecast chart
-  drawForecastChart(dA, dB, u);
-
   document.getElementById('cmp-result').style.display = '';
+
+  // Draw chart after result is visible so canvas.parentElement.clientWidth is correct
+  requestAnimationFrame(() => drawForecastChart(dA, dB, u));
 }
 
 function renderHero(side, loc, c, d, info, u) {

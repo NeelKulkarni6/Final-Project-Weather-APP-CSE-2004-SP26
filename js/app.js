@@ -717,7 +717,7 @@ function initUnitToggle() {
     const opt = e.target.closest('.unit-opt');
     if (!opt || opt.dataset.unit === STATE.unit) return;
     STATE.unit = opt.dataset.unit; lsSet(LS.UNIT, STATE.unit);
-    syncUnitToggle(); if (STATE.weather) renderAll();
+    syncUnitToggle(); if (STATE.weather) { renderAll(); startTicker(STATE.weather, STATE.location, STATE.unit); }
   });
 }
 function syncUnitToggle() {
@@ -804,22 +804,26 @@ function buildTickerText(weather, location, unit) {
 }
 
 function startTicker(weather, location, unit) {
-  const textEl  = document.getElementById('ticker-text');
-  const dupeEl  = document.getElementById('ticker-text-dupe');
-  const track   = document.getElementById('ticker-track');
+  const textEl = document.getElementById('ticker-text');
+  const dupeEl = document.getElementById('ticker-text-dupe');
+  const track  = document.getElementById('ticker-track');
   if (!textEl || !track) return;
 
   const content = buildTickerText(weather, location, unit);
   const spacer  = '\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u2605\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0';
-  textEl.textContent  = content + spacer;
-  dupeEl.textContent  = content + spacer;
+  textEl.textContent = content + spacer;
+  dupeEl.textContent = content + spacer;
 
-  // Calculate duration from text pixel width (target ~50px/s)
-  requestAnimationFrame(() => {
-    const PPS   = 55; // pixels per second — comfortable reading speed
-    const width = textEl.offsetWidth;
-    const dur   = Math.max(20, width / PPS);
+  // Reset animation, measure width, restart
+  track.classList.remove('running');
+  track.style.animationDuration = '';
+
+  // Two rAFs ensure layout has settled before measuring
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    const PPS = 52; // pixels/second — comfortable reading speed
+    const width = textEl.offsetWidth || 3000;
+    const dur   = Math.max(25, width / PPS);
     track.style.animationDuration = dur + 's';
     track.classList.add('running');
-  });
+  }));
 }

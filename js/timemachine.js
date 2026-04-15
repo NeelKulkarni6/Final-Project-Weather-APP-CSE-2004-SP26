@@ -17,6 +17,24 @@ function tmInit() {
     lat:38.627, lon:-90.197, timezone:'America/Chicago',
   });
 
+  // Unit toggle
+  document.querySelectorAll('.unit-opt').forEach(o =>
+    o.classList.toggle('active', o.dataset.unit === TMSTATE.unit)
+  );
+  document.getElementById('unit-toggle').addEventListener('click', e => {
+    const opt = e.target.closest('.unit-opt');
+    if (!opt || opt.dataset.unit === TMSTATE.unit) return;
+    TMSTATE.unit = opt.dataset.unit;
+    lsSet(LS.UNIT, TMSTATE.unit);
+    document.querySelectorAll('.unit-opt').forEach(o =>
+      o.classList.toggle('active', o.dataset.unit === TMSTATE.unit)
+    );
+    // Re-render current date if already loaded
+    const date = document.getElementById('tm-date').value;
+    const result = document.getElementById('tm-result');
+    if (date && result && result.style.display !== 'none') fetchHistoricalWeather(date);
+  });
+
   const loc  = TMSTATE.location;
   const el   = document.getElementById('tm-location');
   if (el) el.textContent = loc.name + (loc.state ? ', ' + loc.state : '');
@@ -46,7 +64,7 @@ function tmInit() {
 async function fetchHistoricalWeather(dateStr) {
   const loc = TMSTATE.location;
   document.getElementById('tm-result').style.display = 'none';
-  document.getElementById('tm-loading').classList.add('active');
+  document.getElementById('loading-overlay').classList.add('active');
 
   try {
     const DAILY = [
@@ -73,7 +91,7 @@ async function fetchHistoricalWeather(dateStr) {
     console.error(err);
     document.getElementById('tm-error').style.display = '';
   } finally {
-    document.getElementById('tm-loading').classList.remove('active');
+    document.getElementById('loading-overlay').classList.remove('active');
   }
 }
 

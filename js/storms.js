@@ -199,7 +199,7 @@ async function findActiveStorms() {
 
 /* ── Page init ──────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', async () => {
-  document.getElementById('storms-loading').classList.add('active');
+  document.getElementById('loading-overlay').classList.add('active');
   document.getElementById('storms-grid').innerHTML = '';
   updateTimestamp();
 
@@ -211,11 +211,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('storms-grid').innerHTML =
       '<p style="color:rgba(255,255,255,0.45);padding:20px">Could not load storm data. Please try again.</p>';
   } finally {
-    document.getElementById('storms-loading').classList.remove('active');
+    document.getElementById('loading-overlay').classList.remove('active');
   }
 
   document.getElementById('storms-refresh').addEventListener('click', async () => {
-    document.getElementById('storms-loading').classList.add('active');
+    document.getElementById('loading-overlay').classList.add('active');
     document.getElementById('storms-grid').innerHTML = '';
     document.getElementById('storms-refresh').disabled = true;
     try {
@@ -223,7 +223,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       renderStorms(storms);
       updateTimestamp();
     } finally {
-      document.getElementById('storms-loading').classList.remove('active');
+      document.getElementById('loading-overlay').classList.remove('active');
       document.getElementById('storms-refresh').disabled = false;
     }
   });
